@@ -1,0 +1,3 @@
+.venv/
+.ansible/
+host_vars/*.local.yml

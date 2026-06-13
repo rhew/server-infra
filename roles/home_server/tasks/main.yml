@@ -1,0 +1,99 @@
+---
+- name: Clone service projects
+  ansible.builtin.git:
+    repo: "{{ item }}"
+    dest: "/home/{{ server_user }}/{{ item | basename | regex_replace('\\.git$', '') }}"
+    update: true
+  become: false
+  loop: "{{ project_repos }}"
+  tags:
+    - service_repos
+
+- name: Create service data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0755"
+  loop: "{{ service_data_dirs }}"
+
+- name: Configure led-pixel-wall weather client
+  ansible.builtin.template:
+    src: led-pixel-wall.env.j2
+    dest: /home/rhew/led-pixel-wall/client-examples/.env
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0600"
+
+- name: Configure media stack override
+  ansible.builtin.template:
+    src: private-torrent-downloader.override.yml.j2
+    dest: /home/rhew/private-torrent-downloader/docker-compose.override.yml
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0644"
+  tags:
+    - services
+    - media_stack
+
+- name: Start Pi-hole
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: /home/rhew/pi-hole
+  become: false
+  tags:
+    - services
+    - pihole
+
+- name: Generate VPN Gate config
+  ansible.builtin.command:
+    cmd: python3 vpngate.py
+    chdir: /home/rhew/private-torrent-downloader
+  become: false
+  tags:
+    - services
+    - media_stack
+
+- name: Start media stack
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: /home/rhew/private-torrent-downloader
+  become: false
+  tags:
+    - services
+    - media_stack
+
+- name: Build led-pixel-wall weather image
+  ansible.builtin.command:
+    cmd: docker build -t led-wall-weather .
+    chdir: /home/rhew/led-pixel-wall
+  become: false
+  tags:
+    - services
+    - led_wall
+
+- name: Remove existing led-wall-weather container
+  ansible.builtin.command:
+    cmd: docker rm -f led-wall-weather
+  become: false
+  register: led_wall_remove
+  changed_when: led_wall_remove.rc == 0
+  failed_when: led_wall_remove.rc not in [0, 1]
+  tags:
+    - services
+    - led_wall
+
+- name: Start led-wall-weather
+  ansible.builtin.command:
+    cmd: >-
+      docker run -d
+      --name led-wall-weather
+      --network host
+      --restart unless-stopped
+      --env-file /home/rhew/led-pixel-wall/client-examples/.env
+      led-wall-weather
+  become: false
+  tags:
+    - services
+    - led_wall

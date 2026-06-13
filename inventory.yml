@@ -1,0 +1,8 @@
+all:
+  children:
+    docker_hosts:
+      hosts:
+        lenny:
+    home_servers:
+      hosts:
+        lenny:

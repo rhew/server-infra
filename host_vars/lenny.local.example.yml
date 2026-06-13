@@ -1,0 +1,6 @@
+---
+media_dir: /home/rhew/media
+
+led_pixel_wall_env:
+  LED_WALL_CONTROLLER_IP: controller-ip
+  LED_WALL_WEATHER_LOCATION: City,ST

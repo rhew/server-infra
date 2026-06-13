@@ -1,0 +1,9 @@
+services:
+  transmission:
+    volumes:
+      - "{{ media_dir }}:/downloads"
+  minidlna:
+    volumes:
+      - "{{ media_dir }}:/media"
+    environment:
+      - MINIDLNA_FRIENDLY_NAME=lenny

@@ -1,0 +1,27 @@
+---
+- name: Configure Docker hosts
+  hosts: docker_hosts
+  roles:
+    - common
+    - docker_host
+
+- name: Configure home servers
+  hosts: home_servers
+  pre_tasks:
+    - name: Check local host vars
+      ansible.builtin.stat:
+        path: "../host_vars/{{ inventory_hostname }}.local.yml"
+      delegate_to: localhost
+      become: false
+      register: local_host_vars
+      tags:
+        - always
+
+    - name: Load local host vars
+      ansible.builtin.include_vars:
+        file: "../host_vars/{{ inventory_hostname }}.local.yml"
+      when: local_host_vars.stat.exists
+      tags:
+        - always
+  roles:
+    - home_server

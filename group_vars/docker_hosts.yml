@@ -1,0 +1,7 @@
+---
+server_user: rhew
+
+docker_log_max_size: 10m
+docker_log_max_file: "3"
+
+lazydocker_version: v0.25.2
