@@ -4,10 +4,17 @@ project_repos:
   - https://github.com/rhew/private-torrent-downloader.git
   - https://github.com/rhew/led-pixel-wall.git
 
+media_mount:
+  src: UUID=178D4DC92A913325
+  path: /home/rhew/media
+  fstype: ntfs-3g
+  opts: uid=1000,gid=1000,dmask=0022,fmask=0133,nofail,x-systemd.automount
+
+media_data_dirs:
+  - /home/rhew/media/downloads/complete
+  - /home/rhew/media/downloads/incomplete
+
 service_data_dirs:
-  - /home/rhew/media
-  - /home/rhew/media/complete
-  - /home/rhew/media/incomplete
   - /home/rhew/pi-hole/etc-pihole
   - /home/rhew/pi-hole/etc-dnsmasq.d
   - /home/rhew/private-torrent-downloader/downloads

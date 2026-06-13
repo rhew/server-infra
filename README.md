@@ -13,7 +13,11 @@ cp host_vars/lenny.local.example.yml host_vars/lenny.local.yml
 $EDITOR host_vars/lenny.local.yml
 ```
 
-Pi-hole assigns a random web password on first start.
+Pi-hole assigns a random web password on first start. Set or change it after startup:
+
+```bash
+ssh -tt lenny 'docker exec -it pihole pihole setpassword'
+```
 
 Run Ansible:
 

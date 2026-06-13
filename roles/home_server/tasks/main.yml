@@ -9,6 +9,37 @@
   tags:
     - service_repos
 
+- name: Install media filesystem packages
+  ansible.builtin.apt:
+    name: ntfs-3g
+    state: present
+
+- name: Create media mount point
+  ansible.builtin.file:
+    path: "{{ media_mount.path }}"
+    state: directory
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0755"
+
+- name: Mount media drive
+  ansible.builtin.mount:
+    src: "{{ media_mount.src }}"
+    path: "{{ media_mount.path }}"
+    fstype: "{{ media_mount.fstype }}"
+    opts: "{{ media_mount.opts }}"
+    state: mounted
+  register: media_mount_result
+
+- name: Create media data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0755"
+  loop: "{{ media_data_dirs }}"
+
 - name: Create service data directories
   ansible.builtin.file:
     path: "{{ item }}"
@@ -57,7 +88,9 @@
 
 - name: Start media stack
   ansible.builtin.command:
-    cmd: docker compose up -d
+    cmd: >-
+      docker compose up -d
+      {% if media_mount_result is defined and media_mount_result.changed %}--force-recreate{% endif %}
     chdir: /home/rhew/private-torrent-downloader
   become: false
   tags:

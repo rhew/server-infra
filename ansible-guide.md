@@ -38,7 +38,9 @@ Out of scope:
 
 ## Home Server Specifics:
 
-- create `/home/rhew/media`
+- mount the media drive at `/home/rhew/media`
+- create `/home/rhew/media/downloads/complete`
+- create `/home/rhew/media/downloads/incomplete`
 - create `/home/rhew/pi-hole/etc-pihole`
 - create `/home/rhew/pi-hole/etc-dnsmasq.d`
 - Services:
