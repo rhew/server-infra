@@ -68,6 +68,25 @@
     - services
     - media_stack
 
+- name: Configure agent-control-plane container identity
+  ansible.builtin.template:
+    src: agent-control-plane.env.j2
+    dest: /home/rhew/agent-control-plane/.env
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0644"
+  tags:
+    - services
+    - agent_control_plane
+
+- name: Remove agent-control-plane compose override
+  ansible.builtin.file:
+    dest: /home/rhew/agent-control-plane/docker-compose.override.yml
+    state: absent
+  tags:
+    - services
+    - agent_control_plane
+
 - name: Start Pi-hole
   ansible.builtin.command:
     cmd: docker compose up -d
@@ -96,6 +115,24 @@
   tags:
     - services
     - media_stack
+
+- name: Check agent-control-plane secrets
+  ansible.builtin.stat:
+    path: /home/rhew/agent-control-plane/hermes-config/.env
+  register: agent_control_plane_secrets
+  tags:
+    - services
+    - agent_control_plane
+
+- name: Start agent-control-plane
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: /home/rhew/agent-control-plane
+  become: false
+  when: agent_control_plane_secrets.stat.exists
+  tags:
+    - services
+    - agent_control_plane
 
 - name: Build led-pixel-wall weather image
   ansible.builtin.command:

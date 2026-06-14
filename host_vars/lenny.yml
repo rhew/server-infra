@@ -3,6 +3,7 @@ project_repos:
   - https://github.com/rhew/pi-hole.git
   - https://github.com/rhew/private-torrent-downloader.git
   - https://github.com/rhew/led-pixel-wall.git
+  - https://github.com/rhew/agent-control-plane.git
 
 media_mount:
   src: UUID=178D4DC92A913325
@@ -18,3 +19,4 @@ service_data_dirs:
   - /home/rhew/pi-hole/etc-pihole
   - /home/rhew/pi-hole/etc-dnsmasq.d
   - /home/rhew/private-torrent-downloader/downloads
+  - /home/rhew/agent-control-plane/hermes-config

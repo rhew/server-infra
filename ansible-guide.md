@@ -47,6 +47,7 @@ Out of scope:
    - `https://github.com/rhew/pi-hole.git`
    - `https://github.com/rhew/private-torrent-downloader.git`
    - `https://github.com/rhew/led-pixel-wall.git`
+   - `https://github.com/rhew/agent-control-plane.git`
 - `led-pixel-wall` config:
    - defined in `host_vars/lenny.local.yml`
 

@@ -13,6 +13,14 @@ cp host_vars/lenny.local.example.yml host_vars/lenny.local.yml
 $EDITOR host_vars/lenny.local.yml
 ```
 
+Create agent-control-plane config on the server:
+
+```bash
+ssh lenny '$EDITOR /home/rhew/agent-control-plane/hermes-config/.env'
+```
+
+Use [host_vars/lenny.agent-control-plane.env.example](host_vars/lenny.agent-control-plane.env.example) as the template.
+
 Pi-hole assigns a random web password on first start. Set or change it after startup:
 
 ```bash
@@ -28,6 +36,7 @@ ansible-playbook playbooks/site.yml
 ```
 
 The normal site run starts Pi-hole, the media stack, and the LED wall client.
+It starts `agent-control-plane` after `/home/rhew/agent-control-plane/hermes-config/.env` exists on the server.
 
 Pull service repo updates:
 
@@ -43,4 +52,5 @@ Start individual services:
 ansible-playbook playbooks/site.yml --tags pihole
 ansible-playbook playbooks/site.yml --tags media_stack
 ansible-playbook playbooks/site.yml --tags led_wall
+ansible-playbook playbooks/site.yml --tags agent_control_plane
 ```
