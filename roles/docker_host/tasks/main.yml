@@ -66,6 +66,39 @@
     enabled: true
     state: started
 
+- name: Install Docker prune script
+  ansible.builtin.template:
+    src: docker-prune.j2
+    dest: /usr/local/sbin/docker-prune
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install Docker prune service
+  ansible.builtin.template:
+    src: docker-prune.service.j2
+    dest: /etc/systemd/system/docker-prune.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd
+
+- name: Install Docker prune timer
+  ansible.builtin.template:
+    src: docker-prune.timer.j2
+    dest: /etc/systemd/system/docker-prune.timer
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd
+
+- name: Enable Docker prune timer
+  ansible.builtin.systemd:
+    name: docker-prune.timer
+    enabled: true
+    state: started
+    daemon_reload: true
+
 - name: Install lazydocker
   ansible.builtin.unarchive:
     src: "https://github.com/jesseduffield/lazydocker/releases/download/{{ lazydocker_version }}/lazydocker_{{ lazydocker_version | regex_replace('^v', '') }}_Linux_x86_64.tar.gz"

@@ -17,6 +17,7 @@ Ansible will manage:
 - `lazydocker`
 - Docker daemon config
 - Docker access for `rhew`
+- weekly Docker pruning for unused images, stopped containers, and build cache older than 7 days
 - project checkout paths
 - project config deployment
 

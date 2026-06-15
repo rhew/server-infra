@@ -46,6 +46,12 @@ ansible-playbook playbooks/site.yml --tags service_repos
 
 This updates the project checkouts. It does not restart containers.
 
+Check Docker pruning:
+
+```bash
+ssh lenny 'systemctl list-timers docker-prune.timer'
+```
+
 Start individual services:
 
 ```bash

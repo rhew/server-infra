@@ -3,5 +3,8 @@ server_user: rhew
 
 docker_log_max_size: 10m
 docker_log_max_file: "3"
+docker_prune_until: 168h
+docker_prune_calendar: weekly
+docker_prune_randomized_delay: 1h
 
 lazydocker_version: v0.25.2

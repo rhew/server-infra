@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+set -eu
+
+until_filter="{{ docker_prune_until }}"
+
+docker builder prune -af --filter "until=${until_filter}"
+docker container prune -f --filter "until=${until_filter}"
+docker image prune -af --filter "until=${until_filter}"

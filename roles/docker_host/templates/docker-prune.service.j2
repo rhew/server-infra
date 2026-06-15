@@ -1,0 +1,8 @@
+[Unit]
+Description=Prune unused Docker data
+Wants=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/docker-prune
