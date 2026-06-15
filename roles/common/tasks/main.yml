@@ -49,3 +49,69 @@
     content: |
       Unattended-Upgrade::Automatic-Reboot "true";
       Unattended-Upgrade::Automatic-Reboot-Time "03:30";
+
+- name: Install Neovim support packages
+  ansible.builtin.apt:
+    name:
+      - build-essential
+      - fd-find
+      - golang
+      - nodejs
+      - npm
+      - ripgrep
+      - unzip
+    state: present
+  tags:
+    - nvim
+
+- name: Create Neovim install directory
+  ansible.builtin.file:
+    path: "/opt/nvim-{{ neovim_version }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags:
+    - nvim
+
+- name: Install Neovim
+  ansible.builtin.unarchive:
+    src: "https://github.com/neovim/neovim/releases/download/{{ neovim_version }}/nvim-linux-x86_64.tar.gz"
+    dest: "/opt/nvim-{{ neovim_version }}"
+    extra_opts:
+      - --strip-components=1
+    remote_src: true
+    owner: root
+    group: root
+    creates: "/opt/nvim-{{ neovim_version }}/bin/nvim"
+  tags:
+    - nvim
+
+- name: Link vim
+  ansible.builtin.file:
+    src: "/opt/nvim-{{ neovim_version }}/bin/nvim"
+    dest: /usr/local/bin/vim
+    state: link
+    owner: root
+    group: root
+  tags:
+    - nvim
+
+- name: Create Neovim config parent directory
+  ansible.builtin.file:
+    path: "/home/{{ server_user }}/.config"
+    state: directory
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0755"
+  tags:
+    - nvim
+
+- name: Clone Neovim config
+  ansible.builtin.git:
+    repo: "{{ neovim_config_repo }}"
+    dest: "/home/{{ server_user }}/.config/nvim"
+    update: true
+  become: false
+  tags:
+    - nvim

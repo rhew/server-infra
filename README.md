@@ -52,6 +52,12 @@ Check Docker pruning:
 ssh lenny 'systemctl list-timers docker-prune.timer'
 ```
 
+Update Neovim config:
+
+```bash
+ansible-playbook playbooks/site.yml --tags nvim
+```
+
 Start individual services:
 
 ```bash

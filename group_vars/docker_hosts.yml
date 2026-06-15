@@ -8,3 +8,5 @@ docker_prune_calendar: weekly
 docker_prune_randomized_delay: 1h
 
 lazydocker_version: v0.25.2
+neovim_version: v0.12.3
+neovim_config_repo: https://github.com/rhew/nvim-config.git

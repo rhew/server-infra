@@ -18,6 +18,7 @@ Ansible will manage:
 - Docker daemon config
 - Docker access for `rhew`
 - weekly Docker pruning for unused images, stopped containers, and build cache older than 7 days
+- Neovim as `vim` and `nvim` with `rhew`'s config
 - project checkout paths
 - project config deployment
 
