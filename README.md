@@ -21,6 +21,12 @@ ssh lenny '$EDITOR /home/rhew/agent-control-plane/hermes-config/.env'
 
 Use [host_vars/lenny.agent-control-plane.env.example](host_vars/lenny.agent-control-plane.env.example) as the template.
 
+Reauthenticate Hermes Codex on the server:
+
+```bash
+ssh -tt lenny 'docker exec -it -u hermes -e HOME=/opt/data agent-control-plane-hermes-1 /opt/hermes/bin/hermes auth add openai-codex'
+```
+
 Pi-hole assigns a random web password on first start. Set or change it after startup:
 
 ```bash
