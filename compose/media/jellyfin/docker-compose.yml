@@ -1,0 +1,29 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    user: "1000:1000"
+    group_add:
+      # Host GIDs for /dev/dri access on lenny: video and render.
+      - "44"
+      - "992"
+    restart: unless-stopped
+    # Host networking is needed for DLNA discovery.
+    # Jellyfin will listen directly on the host, typically on:
+    # - 8096/tcp for HTTP
+    # - 8920/tcp for HTTPS if enabled in Jellyfin
+    # - 7359/udp for client discovery
+    # - 1900/udp for DLNA/SSDP
+    network_mode: host
+    volumes:
+      - ./data/config:/config
+      - ./data/cache:/cache
+      - type: bind
+        source: /home/rhew/media/downloads/complete
+        target: /media
+        read_only: true
+      - /dev/dri:/dev/dri
+    extra_hosts:
+      # Recommended by Jellyfin docs for host-network setups if healthchecks
+      # or container-to-host resolution need host.docker.internal.
+      - "host.docker.internal:host-gateway"
