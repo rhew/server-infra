@@ -1,5 +1,9 @@
 ---
-media_dir: /home/rhew/media
+# Put host-local overrides here. Defaults that are safe to commit live in
+# host_vars/lenny.yml.
+#
+# Example media override:
+# media_stack_vpngate_country: US
 
 led_pixel_wall_env:
   LED_WALL_CONTROLLER_IP: controller-ip

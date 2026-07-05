@@ -1,0 +1,79 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: media-gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      VPN_SERVICE_PROVIDER: custom
+      VPN_TYPE: openvpn
+      OPENVPN_CUSTOM_CONFIG: /gluetun/vpngate.ovpn
+      TZ: "${TZ:-America/New_York}"
+    volumes:
+      - ./gluetun:/gluetun
+    ports:
+      - "${QBITTORRENT_WEBUI_PORT:-8080}:8080"
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: media-qbittorrent
+    depends_on:
+      - gluetun
+    network_mode: "service:gluetun"
+    environment:
+      PUID: "${PUID:-1000}"
+      PGID: "${PGID:-1000}"
+      TZ: "${TZ:-America/New_York}"
+      WEBUI_PORT: "8080"
+    volumes:
+      - ./data/qbittorrent/config:/config
+      - "${MEDIA_DIR:-/home/rhew/media}/downloads:/downloads"
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: media-prowlarr
+    environment:
+      PUID: "${PUID:-1000}"
+      PGID: "${PGID:-1000}"
+      TZ: "${TZ:-America/New_York}"
+    volumes:
+      - ./data/prowlarr/config:/config
+    ports:
+      - "${PROWLARR_PORT:-9696}:9696"
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: media-radarr
+    environment:
+      PUID: "${PUID:-1000}"
+      PGID: "${PGID:-1000}"
+      TZ: "${TZ:-America/New_York}"
+    volumes:
+      - ./data/radarr/config:/config
+      - "${MEDIA_DIR:-/home/rhew/media}/downloads:/downloads"
+      - "${MEDIA_DIR:-/home/rhew/media}/library:/library"
+    ports:
+      - "${RADARR_PORT:-7878}:7878"
+    restart: unless-stopped
+
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: media-jellyfin
+    user: "${PUID:-1000}:${PGID:-1000}"
+    group_add:
+      - "${VIDEO_GID:-44}"
+      - "${RENDER_GID:-992}"
+    environment:
+      TZ: "${TZ:-America/New_York}"
+    network_mode: host
+    volumes:
+      - ./data/jellyfin/config:/config
+      - ./data/jellyfin/cache:/cache
+      - "${MEDIA_DIR:-/home/rhew/media}/library:/media"
+      - /dev/dri:/dev/dri
+    restart: unless-stopped

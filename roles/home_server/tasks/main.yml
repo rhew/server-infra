@@ -13,6 +13,9 @@
   ansible.builtin.apt:
     name: ntfs-3g
     state: present
+  tags:
+    - services
+    - media_stack
 
 - name: Create media mount point
   ansible.builtin.file:
@@ -21,6 +24,9 @@
     owner: "{{ server_user }}"
     group: "{{ server_user }}"
     mode: "0755"
+  tags:
+    - services
+    - media_stack
 
 - name: Mount media drive
   ansible.builtin.mount:
@@ -30,6 +36,9 @@
     opts: "{{ media_mount.opts }}"
     state: mounted
   register: media_mount_result
+  tags:
+    - services
+    - media_stack
 
 - name: Create media data directories
   ansible.builtin.file:
@@ -39,6 +48,9 @@
     group: "{{ server_user }}"
     mode: "0755"
   loop: "{{ media_data_dirs }}"
+  tags:
+    - services
+    - media_stack
 
 - name: Create service data directories
   ansible.builtin.file:
@@ -48,6 +60,70 @@
     group: "{{ server_user }}"
     mode: "0755"
   loop: "{{ service_data_dirs }}"
+  tags:
+    - services
+    - media_stack
+
+- name: Deploy media stack files
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../compose/media/{{ item.name }}"
+    dest: "{{ media_stack_dir }}/{{ item.name }}"
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - name: docker-compose.yml
+      mode: "0644"
+    - name: vpngate.py
+      mode: "0755"
+    - name: media-vpn-refresh
+      mode: "0755"
+  tags:
+    - services
+    - media_stack
+
+- name: Configure media stack environment
+  ansible.builtin.template:
+    src: media-stack.env.j2
+    dest: "{{ media_stack_dir }}/.env"
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0600"
+  tags:
+    - services
+    - media_stack
+
+- name: Install media VPN refresh service
+  ansible.builtin.template:
+    src: media-vpn-refresh.service.j2
+    dest: /etc/systemd/system/media-vpn-refresh.service
+    owner: root
+    group: root
+    mode: "0644"
+  tags:
+    - services
+    - media_stack
+
+- name: Install media VPN refresh timer
+  ansible.builtin.template:
+    src: media-vpn-refresh.timer.j2
+    dest: /etc/systemd/system/media-vpn-refresh.timer
+    owner: root
+    group: root
+    mode: "0644"
+  tags:
+    - services
+    - media_stack
+
+- name: Enable media VPN refresh timer
+  ansible.builtin.systemd:
+    name: media-vpn-refresh.timer
+    enabled: true
+    state: started
+    daemon_reload: true
+  tags:
+    - services
+    - media_stack
 
 - name: Configure led-pixel-wall weather client
   ansible.builtin.template:
@@ -56,17 +132,6 @@
     owner: "{{ server_user }}"
     group: "{{ server_user }}"
     mode: "0600"
-
-- name: Configure media stack override
-  ansible.builtin.template:
-    src: private-torrent-downloader.override.yml.j2
-    dest: /home/rhew/private-torrent-downloader/docker-compose.override.yml
-    owner: "{{ server_user }}"
-    group: "{{ server_user }}"
-    mode: "0644"
-  tags:
-    - services
-    - media_stack
 
 - name: Configure agent-control-plane container identity
   ansible.builtin.template:
@@ -99,7 +164,8 @@
 - name: Generate VPN Gate config
   ansible.builtin.command:
     cmd: python3 vpngate.py
-    chdir: /home/rhew/private-torrent-downloader
+    chdir: "{{ media_stack_dir }}"
+    creates: "{{ media_stack_dir }}/gluetun/vpngate.ovpn"
   become: false
   tags:
     - services
@@ -110,7 +176,7 @@
     cmd: >-
       docker compose up -d
       {% if media_mount_result is defined and media_mount_result.changed %}--force-recreate{% endif %}
-    chdir: /home/rhew/private-torrent-downloader
+    chdir: "{{ media_stack_dir }}"
   become: false
   tags:
     - services

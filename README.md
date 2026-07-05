@@ -13,6 +13,8 @@ cp host_vars/lenny.local.example.yml host_vars/lenny.local.yml
 $EDITOR host_vars/lenny.local.yml
 ```
 
+Committed defaults live in `host_vars/lenny.yml`. Use `host_vars/lenny.local.yml` only for host-local or private overrides.
+
 Create agent-control-plane config on the server:
 
 ```bash

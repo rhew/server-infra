@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh media stack VPNGate config periodically
+
+[Timer]
+OnCalendar={{ media_vpn_refresh_calendar }}
+Persistent=true
+RandomizedDelaySec={{ media_vpn_refresh_randomized_delay }}
+
+[Install]
+WantedBy=timers.target
