@@ -185,7 +185,22 @@ Settings -> Media Management -> Root Folders
 2. Create the initial admin credentials on first login.
 3. Add `LimeTorrents` as an indexer.
 4. Enable it for movies only.
-5. Leave the other indexers out for now.
+5. Add the Radarr app integration so Prowlarr can sync indexers into Radarr:
+
+```text
+Settings -> Apps -> + -> Radarr
+```
+
+   Fill out these fields:
+
+   ```text
+   Name: Radarr
+   Prowlarr Server: http://prowlarr:9696
+   Radarr Server: http://radarr:7878
+   API Key: use the key from Radarr at Settings -> General
+   ```
+6. Save the app and run its test or sync action.
+7. Confirm the synced indexers appear in Radarr at `Settings -> Indexers`.
 
 ### Jellyfin
 
