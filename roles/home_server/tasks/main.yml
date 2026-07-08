@@ -214,6 +214,9 @@
     owner: "{{ server_user }}"
     group: "{{ server_user }}"
     mode: "0600"
+  tags:
+    - services
+    - led_wall
 
 - name: Configure agent-control-plane container identity
   ansible.builtin.template:
