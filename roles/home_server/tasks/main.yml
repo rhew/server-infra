@@ -16,6 +16,7 @@
   tags:
     - services
     - media_stack
+    - private_torrent_downloader
 
 - name: Create media mount point
   ansible.builtin.file:
@@ -27,6 +28,7 @@
   tags:
     - services
     - media_stack
+    - private_torrent_downloader
 
 - name: Mount media drive
   ansible.builtin.mount:
@@ -39,6 +41,7 @@
   tags:
     - services
     - media_stack
+    - private_torrent_downloader
 
 - name: Create media data directories
   ansible.builtin.file:
@@ -51,6 +54,7 @@
   tags:
     - services
     - media_stack
+    - private_torrent_downloader
 
 - name: Create service data directories
   ansible.builtin.file:
@@ -63,67 +67,145 @@
   tags:
     - services
     - media_stack
+    - private_torrent_downloader
 
-- name: Deploy media stack files
+- name: Deploy private-torrent-downloader files
   ansible.builtin.copy:
-    src: "{{ playbook_dir }}/../compose/media/{{ item.name }}"
-    dest: "{{ media_stack_dir }}/{{ item.name }}"
+    src: "{{ playbook_dir }}/../../private-torrent-downloader/{{ item.src }}"
+    dest: "{{ private_torrent_downloader_dir }}/{{ item.dest }}"
     owner: "{{ server_user }}"
     group: "{{ server_user }}"
     mode: "{{ item.mode }}"
   loop:
     - name: docker-compose.yml
+      src: docker-compose.yml
+      dest: docker-compose.yml
+      mode: "0644"
+    - name: Dockerfile.curator
+      src: Dockerfile.curator
+      dest: Dockerfile.curator
+      mode: "0644"
+    - name: requirements.txt
+      src: requirements.txt
+      dest: requirements.txt
+      mode: "0644"
+    - name: transmission-settings.json
+      src: transmission-settings.json
+      dest: transmission-settings.json
       mode: "0644"
     - name: vpngate.py
+      src: vpngate.py
+      dest: vpngate.py
       mode: "0755"
-    - name: media-vpn-refresh
+    - name: vpn-refresh
+      src: vpn-refresh
+      dest: vpn-refresh
       mode: "0755"
   tags:
     - services
     - media_stack
+    - private_torrent_downloader
 
-- name: Configure media stack environment
+- name: Deploy curator source tree
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../../private-torrent-downloader/curator/"
+    dest: "{{ private_torrent_downloader_dir }}/curator/"
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: preserve
+    directory_mode: "0755"
+  tags:
+    - services
+    - media_stack
+    - private_torrent_downloader
+
+- name: Configure private-torrent-downloader environment
   ansible.builtin.template:
-    src: media-stack.env.j2
-    dest: "{{ media_stack_dir }}/.env"
+    src: private-torrent-downloader.env.j2
+    dest: "{{ private_torrent_downloader_dir }}/.env"
     owner: "{{ server_user }}"
     group: "{{ server_user }}"
     mode: "0600"
   tags:
     - services
     - media_stack
+    - private_torrent_downloader
 
-- name: Install media VPN refresh service
+- name: Configure curator server
   ansible.builtin.template:
-    src: media-vpn-refresh.service.j2
-    dest: /etc/systemd/system/media-vpn-refresh.service
+    src: curator-server.toml.j2
+    dest: "{{ private_torrent_downloader_dir }}/curator/server.toml"
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0600"
+  tags:
+    - services
+    - media_stack
+    - private_torrent_downloader
+
+- name: Install private-torrent-downloader VPN refresh service
+  ansible.builtin.template:
+    src: private-torrent-downloader-vpn-refresh.service.j2
+    dest: /etc/systemd/system/private-torrent-downloader-vpn-refresh.service
     owner: root
     group: root
     mode: "0644"
   tags:
     - services
     - media_stack
+    - private_torrent_downloader
 
-- name: Install media VPN refresh timer
+- name: Install private-torrent-downloader VPN refresh timer
   ansible.builtin.template:
-    src: media-vpn-refresh.timer.j2
-    dest: /etc/systemd/system/media-vpn-refresh.timer
+    src: private-torrent-downloader-vpn-refresh.timer.j2
+    dest: /etc/systemd/system/private-torrent-downloader-vpn-refresh.timer
     owner: root
     group: root
     mode: "0644"
   tags:
     - services
     - media_stack
+    - private_torrent_downloader
 
-- name: Enable media VPN refresh timer
+- name: Enable private-torrent-downloader VPN refresh timer
   ansible.builtin.systemd:
-    name: media-vpn-refresh.timer
+    name: private-torrent-downloader-vpn-refresh.timer
     enabled: true
     state: started
     daemon_reload: true
+  when: not ansible_check_mode
   tags:
     - services
     - media_stack
+    - private_torrent_downloader
+
+- name: Stop old media VPN refresh timer
+  ansible.builtin.systemd:
+    name: media-vpn-refresh.timer
+    enabled: false
+    state: stopped
+  register: old_media_vpn_timer
+  failed_when:
+    - old_media_vpn_timer.failed
+    - "'Could not find' not in (old_media_vpn_timer.msg | default(''))"
+    - "'not found' not in (old_media_vpn_timer.msg | default(''))"
+  when: not ansible_check_mode
+  tags:
+    - services
+    - media_stack
+    - private_torrent_downloader
+
+- name: Remove old media VPN refresh units
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/systemd/system/media-vpn-refresh.service
+    - /etc/systemd/system/media-vpn-refresh.timer
+  tags:
+    - services
+    - media_stack
+    - private_torrent_downloader
 
 - name: Configure led-pixel-wall weather client
   ansible.builtin.template:
@@ -164,23 +246,29 @@
 - name: Generate VPN Gate config
   ansible.builtin.command:
     cmd: python3 vpngate.py
-    chdir: "{{ media_stack_dir }}"
-    creates: "{{ media_stack_dir }}/gluetun/vpngate.ovpn"
+    chdir: "{{ private_torrent_downloader_dir }}"
+    creates: "{{ private_torrent_downloader_dir }}/gluetun/vpngate.ovpn"
   become: false
+  when: not ansible_check_mode
   tags:
     - services
     - media_stack
+    - private_torrent_downloader
 
-- name: Start media stack
+- name: Start private-torrent-downloader stack
   ansible.builtin.command:
     cmd: >-
       docker compose up -d
+      --build
+      --remove-orphans
       {% if media_mount_result is defined and media_mount_result.changed %}--force-recreate{% endif %}
-    chdir: "{{ media_stack_dir }}"
+    chdir: "{{ private_torrent_downloader_dir }}"
   become: false
+  when: not ansible_check_mode
   tags:
     - services
     - media_stack
+    - private_torrent_downloader
 
 - name: Check agent-control-plane secrets
   ansible.builtin.stat:

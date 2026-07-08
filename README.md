@@ -43,7 +43,7 @@ ansible-playbook playbooks/site.yml --list-tasks
 ansible-playbook playbooks/site.yml
 ```
 
-The normal site run starts Pi-hole, the media stack, and the LED wall client.
+The normal site run starts Pi-hole, private-torrent-downloader, and the LED wall client.
 It starts `agent-control-plane` after `/home/rhew/agent-control-plane/hermes-config/.env` exists on the server.
 
 Pull service repo updates:
@@ -70,7 +70,7 @@ Start individual services:
 
 ```bash
 ansible-playbook playbooks/site.yml --tags pihole
-ansible-playbook playbooks/site.yml --tags media_stack
+ansible-playbook playbooks/site.yml --tags private_torrent_downloader
 ansible-playbook playbooks/site.yml --tags led_wall
 ansible-playbook playbooks/site.yml --tags agent_control_plane
 ```

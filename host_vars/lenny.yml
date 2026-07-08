@@ -4,19 +4,19 @@ project_repos:
   - https://github.com/rhew/led-pixel-wall.git
   - https://github.com/rhew/agent-control-plane.git
 
-media_stack_dir: /opt/media-stack
-media_stack_puid: 1000
-media_stack_pgid: 1000
-media_stack_tz: America/New_York
-media_stack_qbittorrent_webui_port: 8080
-media_stack_prowlarr_port: 9696
-media_stack_radarr_port: 7878
-media_stack_vpngate_country: ""
-media_stack_vpngate_min_speed: 5000000
-media_stack_vpngate_max_ping: 300
-media_stack_vpngate_min_uptime: 86400
-media_stack_video_gid: 44
-media_stack_render_gid: 992
+private_torrent_downloader_dir: /opt/private-torrent-downloader
+private_torrent_downloader_app_uid: 1000
+private_torrent_downloader_app_gid: 1000
+private_torrent_downloader_tz: America/New_York
+private_torrent_downloader_curator_port: 8787
+private_torrent_downloader_curator_token: ""
+private_torrent_downloader_transmission_image: lscr.io/linuxserver/transmission
+private_torrent_downloader_vpngate_country: ""
+private_torrent_downloader_vpngate_min_speed: 5000000
+private_torrent_downloader_vpngate_max_ping: 300
+private_torrent_downloader_vpngate_min_uptime: 86400
+private_torrent_downloader_video_gid: 44
+private_torrent_downloader_render_gid: 992
 
 media_vpn_refresh_calendar: daily
 media_vpn_refresh_randomized_delay: 1h
@@ -30,16 +30,19 @@ media_mount:
 media_data_dirs:
   - /home/rhew/media/downloads/complete
   - /home/rhew/media/downloads/incomplete
+  - /home/rhew/media/library
+  - /home/rhew/media/library/audiobooks
+  - /home/rhew/media/library/books
   - /home/rhew/media/library/movies
+  - /home/rhew/media/library/shows
 
 service_data_dirs:
   - /home/rhew/pi-hole/etc-pihole
   - /home/rhew/pi-hole/etc-dnsmasq.d
-  - "{{ media_stack_dir }}"
-  - "{{ media_stack_dir }}/data/qbittorrent/config"
-  - "{{ media_stack_dir }}/data/prowlarr/config"
-  - "{{ media_stack_dir }}/data/radarr/config"
-  - "{{ media_stack_dir }}/data/jellyfin/config"
-  - "{{ media_stack_dir }}/data/jellyfin/cache"
-  - "{{ media_stack_dir }}/gluetun"
+  - "{{ private_torrent_downloader_dir }}"
+  - "{{ private_torrent_downloader_dir }}/curator"
+  - "{{ private_torrent_downloader_dir }}/data/jellyfin/config"
+  - "{{ private_torrent_downloader_dir }}/data/jellyfin/cache"
+  - "{{ private_torrent_downloader_dir }}/gluetun"
+  - "{{ private_torrent_downloader_dir }}/jackett-config"
   - /home/rhew/agent-control-plane/hermes-config

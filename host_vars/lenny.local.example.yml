@@ -3,7 +3,7 @@
 # host_vars/lenny.yml.
 #
 # Example media override:
-# media_stack_vpngate_country: US
+# private_torrent_downloader_vpngate_country: US
 
 led_pixel_wall_env:
   LED_WALL_CONTROLLER_IP: controller-ip

@@ -1,9 +1,0 @@
-#!/bin/sh
-set -eu
-
-cd "$(dirname "$0")"
-
-./vpngate.py
-docker compose stop qbittorrent
-docker compose up -d --force-recreate gluetun
-docker compose up -d qbittorrent

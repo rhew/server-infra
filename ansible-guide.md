@@ -45,21 +45,21 @@ Out of scope:
 - mount the media drive at `/home/rhew/media`
 - create `/home/rhew/media/downloads/complete`
 - create `/home/rhew/media/downloads/incomplete`
-- create `/home/rhew/media/library/movies`
+- create `/home/rhew/media/library`
 - create `/home/rhew/pi-hole/etc-pihole`
 - create `/home/rhew/pi-hole/etc-dnsmasq.d`
-- create `/opt/media-stack`
+- create `/opt/private-torrent-downloader`
 - Services:
    - `https://github.com/rhew/pi-hole.git`
-   - `compose/media` copied into `/opt/media-stack`
    - `https://github.com/rhew/led-pixel-wall.git`
    - `https://github.com/rhew/agent-control-plane.git`
+   - selected runtime files from the local peer checkout `../private-torrent-downloader` copied into `/opt/private-torrent-downloader`
 - `led-pixel-wall` config:
    - defined in `host_vars/lenny.local.yml`
 - Media VPNGate maintenance:
-   - `media-vpn-refresh.timer` refreshes the generated Gluetun OpenVPN config daily.
+   - `private-torrent-downloader-vpn-refresh.timer` refreshes the generated Gluetun OpenVPN config daily.
    - The timer does scheduled refresh only, not healthcheck-based repair.
-   - Media stack config is rendered from Ansible vars; do not edit `/opt/media-stack/.env` directly.
+   - App config is rendered from Ansible vars; do not edit `/opt/private-torrent-downloader/.env` directly.
 
 ## Web Server Specifics:
 

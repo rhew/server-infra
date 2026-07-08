@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh private-torrent-downloader VPNGate config
+Wants=docker.service network-online.target
+After=docker.service network-online.target
+
+[Service]
+Type=oneshot
+User={{ server_user }}
+WorkingDirectory={{ private_torrent_downloader_dir }}
+ExecStart={{ private_torrent_downloader_dir }}/vpn-refresh
