@@ -69,51 +69,55 @@
     - media_stack
     - private_torrent_downloader
 
-- name: Deploy private-torrent-downloader files
-  ansible.builtin.copy:
-    src: "{{ playbook_dir }}/../../private-torrent-downloader/{{ item.src }}"
-    dest: "{{ private_torrent_downloader_dir }}/{{ item.dest }}"
-    owner: "{{ server_user }}"
-    group: "{{ server_user }}"
-    mode: "{{ item.mode }}"
-  loop:
-    - name: docker-compose.yml
-      src: docker-compose.yml
-      dest: docker-compose.yml
-      mode: "0644"
-    - name: Dockerfile.curator
-      src: Dockerfile.curator
-      dest: Dockerfile.curator
-      mode: "0644"
-    - name: requirements.txt
-      src: requirements.txt
-      dest: requirements.txt
-      mode: "0644"
-    - name: transmission-settings.json
-      src: transmission-settings.json
-      dest: transmission-settings.json
-      mode: "0644"
-    - name: vpngate.py
-      src: vpngate.py
-      dest: vpngate.py
-      mode: "0755"
-    - name: vpn-refresh
-      src: vpn-refresh
-      dest: vpn-refresh
-      mode: "0755"
+- name: Deploy private-torrent-downloader from GitHub
+  ansible.builtin.shell: |
+    set -eu
+    initialized=false
+    before_head="$(git rev-parse HEAD 2>/dev/null || true)"
+    before_dirty=""
+    if [ -d .git ]; then
+      before_dirty="$(git status --porcelain --untracked-files=no)"
+    fi
+    if [ ! -d .git ]; then
+      git init
+      initialized=true
+    fi
+    git remote remove origin >/dev/null 2>&1 || true
+    git remote add origin "{{ private_torrent_downloader_repo }}"
+    git fetch origin "{{ private_torrent_downloader_version }}"
+    git checkout -B "{{ private_torrent_downloader_version }}"
+    git reset --hard "origin/{{ private_torrent_downloader_version }}"
+    after_head="$(git rev-parse HEAD)"
+    if [ "$initialized" = true ] || [ "$before_head" != "$after_head" ] || [ -n "$before_dirty" ]; then
+      echo "updated private-torrent-downloader to $after_head"
+    fi
+  args:
+    chdir: "{{ private_torrent_downloader_dir }}"
+    executable: /bin/bash
+  become: false
+  register: private_torrent_downloader_git_deploy
+  changed_when: "'updated private-torrent-downloader' in private_torrent_downloader_git_deploy.stdout"
   tags:
+    - service_repos
     - services
     - media_stack
     - private_torrent_downloader
 
-- name: Deploy curator source tree
-  ansible.builtin.copy:
-    src: "{{ playbook_dir }}/../../private-torrent-downloader/curator/"
-    dest: "{{ private_torrent_downloader_dir }}/curator/"
-    owner: "{{ server_user }}"
-    group: "{{ server_user }}"
-    mode: preserve
-    directory_mode: "0755"
+- name: Remove unmanaged curator artifacts
+  ansible.builtin.file:
+    path: "{{ private_torrent_downloader_dir }}/{{ item }}"
+    state: absent
+  loop:
+    - curator/__pycache__
+    - curator/app.py
+    - curator/client.example.toml
+    - curator/client.toml
+    - curator/curator
+    - curator/curator.toml
+    - curator/library
+    - curator/remote.py
+    - curator/server.example.toml
+    - curator/server.toml
   tags:
     - services
     - media_stack
@@ -131,13 +135,38 @@
     - media_stack
     - private_torrent_downloader
 
-- name: Configure curator server
-  ansible.builtin.template:
-    src: curator-server.toml.j2
-    dest: "{{ private_torrent_downloader_dir }}/curator/server.toml"
+- name: Check local curator config
+  ansible.builtin.stat:
+    path: "{{ playbook_dir }}/../host_vars/{{ inventory_hostname }}.curator.toml"
+  delegate_to: localhost
+  become: false
+  register: private_torrent_downloader_curator_config
+  tags:
+    - services
+    - media_stack
+    - private_torrent_downloader
+
+- name: Configure curator server from local config
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../host_vars/{{ inventory_hostname }}.curator.toml"
+    dest: "{{ private_torrent_downloader_dir }}/curator-config/curator.toml"
     owner: "{{ server_user }}"
     group: "{{ server_user }}"
     mode: "0600"
+  when: private_torrent_downloader_curator_config.stat.exists
+  tags:
+    - services
+    - media_stack
+    - private_torrent_downloader
+
+- name: Configure curator server from template
+  ansible.builtin.template:
+    src: curator.toml.j2
+    dest: "{{ private_torrent_downloader_dir }}/curator-config/curator.toml"
+    owner: "{{ server_user }}"
+    group: "{{ server_user }}"
+    mode: "0600"
+  when: not private_torrent_downloader_curator_config.stat.exists
   tags:
     - services
     - media_stack

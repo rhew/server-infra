@@ -4,12 +4,13 @@ project_repos:
   - https://github.com/rhew/led-pixel-wall.git
   - https://github.com/rhew/agent-control-plane.git
 
+private_torrent_downloader_repo: https://github.com/rhew/private-torrent-downloader.git
+private_torrent_downloader_version: main
 private_torrent_downloader_dir: /opt/private-torrent-downloader
 private_torrent_downloader_app_uid: 1000
 private_torrent_downloader_app_gid: 1000
 private_torrent_downloader_tz: America/New_York
 private_torrent_downloader_curator_port: 8787
-private_torrent_downloader_curator_token: ""
 private_torrent_downloader_transmission_image: lscr.io/linuxserver/transmission
 private_torrent_downloader_vpngate_country: ""
 private_torrent_downloader_vpngate_min_speed: 5000000
@@ -41,6 +42,7 @@ service_data_dirs:
   - /home/rhew/pi-hole/etc-dnsmasq.d
   - "{{ private_torrent_downloader_dir }}"
   - "{{ private_torrent_downloader_dir }}/curator"
+  - "{{ private_torrent_downloader_dir }}/curator-config"
   - "{{ private_torrent_downloader_dir }}/data/jellyfin/config"
   - "{{ private_torrent_downloader_dir }}/data/jellyfin/cache"
   - "{{ private_torrent_downloader_dir }}/gluetun"

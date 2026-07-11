@@ -53,7 +53,7 @@ Out of scope:
    - `https://github.com/rhew/pi-hole.git`
    - `https://github.com/rhew/led-pixel-wall.git`
    - `https://github.com/rhew/agent-control-plane.git`
-   - selected runtime files from the local peer checkout `../private-torrent-downloader` copied into `/opt/private-torrent-downloader`
+   - `https://github.com/rhew/private-torrent-downloader.git` cloned into `/opt/private-torrent-downloader`
 - `led-pixel-wall` config:
    - defined in `host_vars/lenny.local.yml`
 - Media VPNGate maintenance:

@@ -1,0 +1,32 @@
+[jackett]
+base_url = "http://jackett:9117"
+transmission_base_url = "http://jackett:9117"
+config_dir = "/app/jackett-config/Jackett"
+
+[network]
+timeout = 20
+
+[paths]
+downloads_root = "/app/downloads"
+library_root = "/app/library"
+gluetun_state_path = "/app/gluetun/vpngate-state.json"
+
+[transmission]
+rpc_url = "http://gluetun:9091/transmission/rpc"
+web_url = "http://localhost:9091"
+
+[ui]
+default_media_type = "movies"
+default_sort = "seeders"
+
+[media_types.movies]
+label = "Movies"
+library_dir = "movies"
+indexers = ["yts"]
+categories = [2000]
+
+[media_types.tv]
+label = "TV"
+library_dir = "tv"
+indexers = ["eztv"]
+categories = [5000]
