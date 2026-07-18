@@ -12,6 +12,7 @@ private_torrent_downloader_app_gid: 1000
 private_torrent_downloader_tz: America/New_York
 private_torrent_downloader_curator_port: 8787
 private_torrent_downloader_transmission_image: lscr.io/linuxserver/transmission
+private_torrent_downloader_transmission_config_dir: /opt/private-torrent-downloader/transmission-config
 private_torrent_downloader_vpngate_country: ""
 private_torrent_downloader_vpngate_min_speed: 5000000
 private_torrent_downloader_vpngate_max_ping: 300
@@ -28,14 +29,17 @@ media_mount:
   fstype: ntfs-3g
   opts: uid=1000,gid=1000,dmask=0022,fmask=0133,nofail,x-systemd.automount
 
+# Required common parent of the sibling downloads/ and library/ directories.
+media_root: /home/rhew/media
+
 media_data_dirs:
-  - /home/rhew/media/downloads/complete
-  - /home/rhew/media/downloads/incomplete
-  - /home/rhew/media/library
-  - /home/rhew/media/library/audiobooks
-  - /home/rhew/media/library/books
-  - /home/rhew/media/library/movies
-  - /home/rhew/media/library/shows
+  - "{{ media_root }}/downloads/complete"
+  - "{{ media_root }}/downloads/incomplete"
+  - "{{ media_root }}/library"
+  - "{{ media_root }}/library/audiobooks"
+  - "{{ media_root }}/library/books"
+  - "{{ media_root }}/library/movies"
+  - "{{ media_root }}/library/shows"
 
 service_data_dirs:
   - /home/rhew/pi-hole/etc-pihole

@@ -43,12 +43,14 @@ Out of scope:
 - committed defaults live in `host_vars/lenny.yml`
 - host-local or private overrides live in ignored `host_vars/lenny.local.yml`
 - mount the media drive at `/home/rhew/media`
+- set `media_root` explicitly to the host directory containing sibling `downloads/` and `library/` directories
 - create `/home/rhew/media/downloads/complete`
 - create `/home/rhew/media/downloads/incomplete`
 - create `/home/rhew/media/library`
 - create `/home/rhew/pi-hole/etc-pihole`
 - create `/home/rhew/pi-hole/etc-dnsmasq.d`
 - create `/opt/private-torrent-downloader`
+- persist Transmission settings, torrent metadata, and resume state in `private_torrent_downloader_transmission_config_dir`
 - Services:
    - `https://github.com/rhew/pi-hole.git`
    - `https://github.com/rhew/led-pixel-wall.git`
@@ -60,6 +62,26 @@ Out of scope:
    - `private-torrent-downloader-vpn-refresh.timer` refreshes the generated Gluetun OpenVPN config daily.
    - The timer does scheduled refresh only, not healthcheck-based repair.
    - App config is rendered from Ansible vars; do not edit `/opt/private-torrent-downloader/.env` directly.
+
+### Private Torrent Downloader Storage
+
+`media_root` is required and must be an explicit absolute path. Its layout is:
+
+```text
+<media_root>/
+  downloads/
+  library/
+```
+
+Curator receives exactly one media bind mount, `<media_root>:/app/media`, and
+uses `/app/media/downloads` and `/app/media/library`. This is required because
+Curator archives only with atomic rename and never copies across mounts.
+Transmission keeps `<media_root>/downloads:/downloads`; Jellyfin keeps
+`<media_root>/library:/media`. Do not add nested Curator mounts for either
+subdirectory.
+
+Set `private_torrent_downloader_transmission_config_dir` to a dedicated absolute
+host directory; the production default keeps it outside `media_root`.
 
 ## Web Server Specifics:
 

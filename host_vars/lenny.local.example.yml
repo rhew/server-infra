@@ -2,7 +2,14 @@
 # Put host-local overrides here. Defaults that are safe to commit live in
 # host_vars/lenny.yml.
 #
-# Example media override:
+# Media storage must have sibling downloads/ and library/ directories on the
+# same filesystem. Set this explicitly; do not use a broad parent such as /.
+# media_root: /home/rhew/media
+#
+# Transmission stores settings, torrent metadata, and resume state here.
+# private_torrent_downloader_transmission_config_dir: /opt/private-torrent-downloader/transmission-config
+#
+# Example VPN override:
 # private_torrent_downloader_vpngate_country: US
 
 led_pixel_wall_env:
