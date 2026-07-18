@@ -323,11 +323,24 @@
     - agent_control_plane
 
 - name: Start agent-control-plane
-  ansible.builtin.command:
-    cmd: docker compose up -d
-    chdir: /home/rhew/agent-control-plane
+  community.docker.docker_compose_v2:
+    project_src: /home/rhew/agent-control-plane
+    state: present
   become: false
-  when: agent_control_plane_secrets.stat.exists
+  when:
+    - agent_control_plane_enabled | bool
+    - agent_control_plane_secrets.stat.exists
+  tags:
+    - services
+    - agent_control_plane
+
+- name: Undeploy agent-control-plane
+  community.docker.docker_compose_v2:
+    project_src: /home/rhew/agent-control-plane
+    state: absent
+    remove_volumes: false
+  become: false
+  when: not (agent_control_plane_enabled | bool)
   tags:
     - services
     - agent_control_plane

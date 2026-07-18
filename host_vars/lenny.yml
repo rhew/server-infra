@@ -4,6 +4,8 @@ project_repos:
   - https://github.com/rhew/led-pixel-wall.git
   - https://github.com/rhew/agent-control-plane.git
 
+agent_control_plane_enabled: true
+
 private_torrent_downloader_repo: https://github.com/rhew/private-torrent-downloader.git
 private_torrent_downloader_version: main
 private_torrent_downloader_dir: /opt/private-torrent-downloader
